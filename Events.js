@@ -33,20 +33,20 @@
 
     function createEvent(type, dis, args){
         var ev;
-        
-        if (compat){                         
+
+        if (compat){
             ev = document.createEvent('UIEvents');
             ev.initEvent(type, false, false);
         }else{
-            ev = {};    
+            ev = {};
         }
 
         ev.dispatcher = dis;
         ev.args = args;
-        
+
         return ev;
     }
-     
+
     /**
      * Events Provider.
      *
@@ -117,7 +117,7 @@
 
     /*
      * Events.Pesudoes allows you to add pseudo behaviors
-     * 
+     *
      * Each object in the collection can hold both addEvent and fireEvent Methods
      *
      * The addEvent method will be fired *instead* of the normal behavior, and will be passed
@@ -131,8 +131,8 @@
     Events.Pseudoes = {
         once : {
             addEvent : function(type,fn){
-                return this.addEventOnce(type, fn);    
-            }    
+                return this.addEventOnce(type, fn);
+            }
         },
 
         latched : {
@@ -144,15 +144,15 @@
         }
     };
 
-    this.Events = Events;  
+    this.Events = Events;
 
     addEvent = compat ?
         function(type,fn){
             var type = processType(type),
                 pseudo_fn = Events.Pseudoes[type.pseudo] && Events.Pseudoes[type.pseudo].addEvent;
- 
+
             if (pseudo_fn){
-                return pseudo_fn.apply(this,[type.name,fn,type.args]);    
+                return pseudo_fn.apply(this,[type.name,fn,type.args]);
             }
 
             if (this.$latched && this.$latched[type.name]){
@@ -163,13 +163,13 @@
             return this;
          } :
          function(type,fn){
-            var type = processType(type), 
+            var type = processType(type),
                 pseudo_fn = Events.Pseudoes[type.pseudo] && Events.Pseudoes[type.pseudo].addEvent;
- 
+
             if (pseudo_fn){
-                return pseudo_fn.apply(this,[type.name,fn,type.args]);    
-            }                                                                                           
-              
+                return pseudo_fn.apply(this,[type.name,fn,type.args]);
+            }
+
             if (this.$latched[type.name]){
                 fn.apply(null,[this.$latched[type.name].event]);
                 return this;
@@ -190,7 +190,7 @@
             this.$event_element.dispatchEvent(ev);
 
             if (pseudo_fn){
-                pseudo_fn.call(this,type.name,ev);    
+                pseudo_fn.call(this,type.name,ev);
             }
 
             return this;
@@ -198,22 +198,22 @@
          function(type, args){
             var type = processType(type),
                 pseudo_fn = Events.Pseudoes[type.pseudo] && Events.Pseudoes[type.pseudo].fireEvent,
-                ev = createEvent(type.name, this, args), 
+                ev = createEvent(type.name, this, args),
                 i, fn;
 
             if (pseudo_fn){
-                pseudo_fn.call(this,type.name,ev);    
-            }    
+                pseudo_fn.call(this,type.name,ev);
+            }
 
             if (!this.$events[type.name]) return this;
 
             for (i=0; fn = this.$events[type.name]; i++){
                 fn.apply(null,[ev]);
-            }         
+            }
 
             if (pseudo_fn){
-                Events.Pseudoes[type.pseudo].fireEvent.call(this,type,ev);    
-            }                                      
+                Events.Pseudoes[type.pseudo].fireEvent.call(this,type,ev);
+            }
 
             return this;
          };
