@@ -1,7 +1,9 @@
 #Events
 
 
-This library is intended to supply an event interface to javascript objects using a Mixin pattern. 
+This library is intended to supply an event interface to javascript objects using a Mixin pattern.
+The library is designed with encapsulation and uninterupptability in mind. This means a broken function will not stop
+the event loop (on modern browsers).
 
 
 ##Features
@@ -16,9 +18,24 @@ This library is intended to supply an event interface to javascript objects usin
 
 The simplest way to enable events support is like this:
 
+
     function MyObject(){
         Events.call(this);    
     }
+
+
+This method will introduce the entire events API onto the object.
+You could also create an instance of the object:
+
+
+    var ev = new Events();
+
+
+Or, if you wish, you could always inherit it:
+
+
+    obj.prototype = new Events();
+
 
 ##Methods
 
@@ -27,10 +44,12 @@ Adds a listener. When fired, the function will be passed an event object, with 2
   1. args - arguments that were passed by dispatcher.
   2. dispatcher - the object dispatching the event
 
+
     obj.addEvent('show',function(e){
         e.dispatcher; //obj
         e.args; //whatever arguments were passed
     });
+
 
 ###fireEvent(type, args)
 Dispathces an event, passing arguments:
