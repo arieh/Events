@@ -118,5 +118,21 @@ describe("Events", function(){
         expect(counter).toEqual(2, "Event should fire exactly twice");
         
     });
+
+    it ("Should continue event loop even if a function raises an error", function(){
+        var evs = new Events(), counter = 0;
+
+        evs.addEvent('test', function(){counter++;});
+        evs.addEvent('test', function(){a;});
+        evs.addEvent('test', function(){counter++;});
+
+        setTimeout(function(){
+            evs.fireEvent('test');    
+        },100);
+
+        waitsFor(function(){ return counter==2; }, "Loop should continue", 100);
+        
+    });
+    
             
 });
