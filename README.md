@@ -8,8 +8,9 @@ This library is intended to supply an event interface to javascript objects usin
   1. Easy to integrate - can be used as a mixin, thus making it easy to integrate with any existing codebase.
   2. Fast - On modern browsers (FF, Chrome, Safari and IE > 8) the library uses costume DOM events to handle the events.
   3. Encapsulated - When used on modern browsers, broken functions will not break the event loop.
-  4. Advanced use case - supports latched events and adding events once.
-  5. Cross-browser - falls back to a more standard costume events handler.
+  4. Supports creating pseudo events (like `:once` and `:latched`).
+  5. Comes with built in useful utilities.
+  6. Cross-browser - falls back to a more standard costume events handler.
 
 ##Usage
 
