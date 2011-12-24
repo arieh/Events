@@ -70,7 +70,7 @@ For example:
 
 This will allow you to do:
 
-    obj.addEvent('test:delayed(1000)', fn);//will fire a delayed event
+    obj.addEvent('test:delayed(1000)', fn);//will add a delayed event
 
 Some important notes:
   * the `addEvent` method will be fired *instead* of the default `addEvent` method. It's arguments will be `event-type`, the function, and passed parameter (if exists).
