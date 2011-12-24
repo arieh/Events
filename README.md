@@ -65,3 +65,7 @@ a 'load' event, or a 'domready' event. If any arguments were passed, they will b
     obj.addEvent('load', function(e){  
         e.args.someParam; //a    
     });
+
+
+##Cleanup
+In case you want to ensure cleanup, the Mixin automatically listens to the `destroy` event and cleans itself up for destruction
