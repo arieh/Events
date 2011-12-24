@@ -1,4 +1,4 @@
-!function(ns){
+!function(){
     var compat = 'createEvent' in document,
         addEvent, fireEvent, removeEvent, addEventOnce, Events;
 
@@ -18,15 +18,15 @@
     }
 
     function getPseudo(string){
-        return string.match(/([a-zA-Z.]+)\:([a-zA-Z]*)$/);
+        return string.match(/([a-zA-Z.]+)\:([a-zA-Z]*)$/) || [string,string];
     }
 
-    function processType(string){
+    function processType(type){
         var result = getPseudo(removeOn(type));
 
         return {
-            name : result[0],
-            pseudo : result[1]
+            name : result[1],
+            pseudo : result[2]
         };
     }
 
@@ -37,7 +37,7 @@
             if (this.$latched[type.name]){
                 fn.apply(null,[this.$latched[type.name].event]);
                 return this;
-            };
+            }
 
             if (type.pseudo == 'once'){
                 return this.addEventOnce(type.name,fn);
@@ -52,7 +52,7 @@
             if (this.$latched[type.name]){
                 fn.apply(null,[this.$latched[type.name].event]);
                 return this;
-            };
+            }
 
             if (type.pseudo == 'once'){
                 return this.addEventOnce(type.name,fn);
@@ -67,7 +67,7 @@
     fireEvent = compat ?
         function(type, args){
             var type = processType(type),
-                ev = document.createEvent('UIEvents'),
+                ev = document.createEvent('UIEvents');
 
             ev.initEvent(type.name, false, false);
 
@@ -108,8 +108,9 @@
 
     removeEvent = compat ?
         function(type, fn){
-            var type = processType(type),
-            this.$events_element.removeEventListener(type.name,fn,false);
+            var type = processType(type);
+
+            this.$event_element.removeEventListener(type.name,fn,false);
 
             return this;
         } : function(type, fn){
@@ -147,10 +148,10 @@
     Events = function Events(el){
         var $this = this;
 
-        if (compat){
+        if (!compat){
             this.$events = {};
         }else{
-            this.$events_element = el || document.createElement('events');
+            this.$event_element = el || document.createElement('events');
         }
 
         this.$latched = {};
@@ -196,15 +197,15 @@
         this.addEventOnce = addEventOnce;
 
         this.addEvent('destroy',function(){
-            $this.$events_element = null;
+            $this.$event_element = null;
         });
     };
 
     Events.removeOn = removeOn;
-    Events.getPseudos = getPseudos;
+    Events.getPseudos = getPseudo;
     Events.processType = processType;
 
     this.Events = Events;
 
-}.apply(this,[this]);
+}.call(this);
 
