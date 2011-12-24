@@ -47,8 +47,9 @@ Same as `addEvent` only it will remove the listener automatically once dispatche
 ##Pseudo events
 The library supports 2 specific pseudo events (later versions will support creating new ones as well):
   
-  1. ':once' - when used event will be added once.
-  2. ':latched' - see latched section
+  1. `:once` - when used event will be added once.
+  2. `:latched` - see latched section
+
 
     obj.addEvent('test:once', function(){/* ... */ });
     
