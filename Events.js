@@ -1,24 +1,24 @@
 !function(ns){
-    var compat = 'createEvent' in document, 
+    var compat = 'createEvent' in document,
         addEvent, fireEvent, removeEvent, addEventOnce, Events;
 
     function indexOf(arr, target){
         var i, item;
         if (arr.indexOf) return arr.indexOf(target);
-        
+
         for(i=0; item = arr[i]; i++) if (item == target) return i;
-        
+
         return -1;
-    }        
-    
+    }
+
     function removeOn(string){
         return string.replace(/^on([A-Z])/, function(full, first){
             return first.toLowerCase();
         });
-    }      
+    }
 
     function getPseudo(string){
-        return string.match(/([a-zA-Z.]+)\:([a-zA-Z]*)$/);   
+        return string.match(/([a-zA-Z.]+)\:([a-zA-Z]*)$/);
     }
 
     function processType(string){
@@ -30,7 +30,7 @@
         };
     }
 
-    addEvent = compat ? 
+    addEvent = compat ?
         function(type,fn){
             var type = processType(type);
 
@@ -40,13 +40,13 @@
             };
 
             if (type.pseudo == 'once'){
-                return this.addEventOnce(type.name,fn);    
+                return this.addEventOnce(type.name,fn);
             }
 
-            this.$event_element.addEventListener(type.name,fn,false);    
+            this.$event_element.addEventListener(type.name,fn,false);
             return this;
-         } : 
-         function(type,fn){ 
+         } :
+         function(type,fn){
             var type = processType(type);
 
             if (this.$latched[type.name]){
@@ -55,21 +55,21 @@
             };
 
             if (type.pseudo == 'once'){
-                return this.addEventOnce(type.name,fn);    
+                return this.addEventOnce(type.name,fn);
             }
-                  
+
             if (!this.$events[type.name]) this.$events[type.name] = [fn];
             else this.$evetns[type.name].push(fn);
 
             return this;
         };
 
-    fireEvent = compat ? 
+    fireEvent = compat ?
         function(type, args){
             var type = processType(type),
                 ev = document.createEvent('UIEvents'),
-            
-            ev.initEvent(type.name, false, false);    
+
+            ev.initEvent(type.name, false, false);
 
             ev.args = args;
             ev.dispatcher = this;
@@ -78,29 +78,29 @@
 
             if (type.pseudo == 'latched'){
                 this.$latched[type.name] = {
-                    event : ev    
+                    event : ev
                 };
             }
 
             return this;
-         } : 
+         } :
          function(type, args){
             var type = processType(type),
                 ev = {
                     args : args,
                     dispatcher : this
-                }, i, fn;        
+                }, i, fn;
 
             if (type.pseudo == 'latched'){
                 this.$latched[type.name] = {
-                    event : ev    
+                    event : ev
                 };
-            }                                    
+            }
 
-            if (!this.$events[type.name]) return this;  
-            
+            if (!this.$events[type.name]) return this;
+
             for (i=0; fn = this.$events[type.name]; i++){
-                fn.apply(null,[ev]);    
+                fn.apply(null,[ev]);
             }
 
             return this;
@@ -118,7 +118,7 @@
             if (!this.$events[type.name]) return this;
 
             index = indexOf(this.$events[type.name],fn);
-            
+
             if (index <0) return this;
 
             this.$events[type.name].splice(index,1);
@@ -133,23 +133,66 @@
         this.addEvent(type.name, function once(e){
             fn.apply(null,[e]);
             $this.removeEvent(type.name,once);
-        });      
+        });
     };
 
+    /**
+     * Events Provider.
+     *
+     * Can function either as a standalone or a Mixin
+     *
+     * @param {Element} el element to use as event target. Optional
+     *
+     */
     Events = function Events(el){
         var $this = this;
 
         if (compat){
-            this.$events = {};    
+            this.$events = {};
         }else{
             this.$events_element = el || document.createElement('events');
         }
 
         this.$latched = {};
 
+        /**
+         * Adds an event
+         *
+         * @param {String}    the event type
+         * @param {Function}  a function to add
+         *
+         * @return this
+         */
         this.addEvent = addEvent;
+
+        /**
+         * dispatches an event
+         *
+         * @param {String} event type
+         * @param {Mixed}  arguments to pass with the event
+         *
+         * @return this
+         */
         this.fireEvent = fireEvent;
+
+        /**
+         * removes a function from an event
+         *
+         * @param {String}   event type
+         * @param {Function} function to remove from stack
+         *
+         * @return this
+         */
         this.removeEvent = removeEvent;
+
+        /**
+         * Adds an event for one execution, then removes it
+         *
+         * @param {String}    the event type
+         * @param {Function}  a function to add
+         *
+         * @return this
+         */
         this.addEventOnce = addEventOnce;
 
         this.addEvent('destroy',function(){
