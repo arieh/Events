@@ -26,14 +26,18 @@ describe("Events", function(){
     });
     
     it ("Should pass paramaters to event", function(){
-        var evs = new Events();
+        var evs = new Events(), done = false;
 
         evs.addEvent('test', function(e){
             expect(JSON.stringify(e.args)).toEqual(JSON.stringify({a:"a",b:"b"}), "Arguments should be passed correctly");
             expect(e.dispatcher).toEqual(evs,"dispatcher should be passed correctly");
+
+            done = true;
         });
 
         evs.fireEvent('test',{a:"a",b:"b"});
+        expect(done).toEqual(true, "Event should dispatch");
+        
     });
 
     it ("Should remove event properly", function(){
@@ -88,5 +92,31 @@ describe("Events", function(){
         
     });
     
+    it ("Should support adding pseudo events with parameter", function(){
+        var evs = new Events(), counter = 0;
+
+        Events.Pseudoes.times = {
+            addEvent : function(type,fn,count){
+                var counter = 0, $this = this;
+
+                this.addEvent(type, function times(){
+                    fn.apply(null, arguments);
+                    counter++;
+                    if (counter == count) $this.removeEvent(type,times);
+                });
+            }       
+        };
+
+        evs.addEvent('test:times(2)',function(){
+            counter++;    
+        });
+
+        evs.fireEvent('test');
+        evs.fireEvent('test');
+        evs.fireEvent('test');
+
+        expect(counter).toEqual(2, "Event should fire exactly twice");
         
+    });
+            
 });

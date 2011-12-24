@@ -45,7 +45,7 @@ Removes a listener.
 Same as `addEvent` only it will remove the listener automatically once dispatched.
 
 ##Pseudo events
-The library supports 2 specific pseudo events (later versions will support creating new ones as well):
+The library supports 2 specific pseudo events:
   
   1. `:once` - when used event will be added once.
   2. `:latched` - see latched section
@@ -54,6 +54,27 @@ The library supports 2 specific pseudo events (later versions will support creat
     obj.addEvent('test:once', function(){/* ... */ });
     
     obj.fireEvent('load:latched');
+
+You can also add your own pseudo events, by adding them to Events.Pseudoes.
+In order to create a new pseudo-event, add an object to the collection, containing either `addEvent` method, `fireEvent` method or both.
+You can even add a parameter to the pseudo-event.
+For example:
+
+    Events.Pseudoes.delayed = {
+        addEvent : function(type, fn, time){
+            this.addEvent(type, function(){
+                setTimeout(fn, time);    
+            });    
+        }
+    };
+
+This will allow you to do:
+
+    obj.addEvent('test:delayed(1000)', fn);//will fire a delayed event
+
+Some important notes:
+  * the `addEvent` method will be fired *instead* of the default `addEvent` method. It's arguments will be `event-type`, the function, and passed parameter (if exists).
+  * the `fireEvent` method will be fire *after* the default `fireEvent` method. It's arguments will be `event-type` and the event created by the method.
 
 ##Latched events
 Latched events are events that once fired once will dispatch automatically afterwards. Examples for such events can be 
