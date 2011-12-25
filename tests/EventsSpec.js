@@ -3,7 +3,7 @@ describe("Events", function(){
         var evs = new Events(), done = false;
 
         evs.addEvent('test', function(){
-            done = true;    
+            done = true;
         });
 
         evs.fireEvent('test');
@@ -24,7 +24,7 @@ describe("Events", function(){
 
         expect(result).toEqual(4, "Events to have fired 4 functions");
     });
-    
+
     it ("Should pass paramaters to event", function(){
         var evs = new Events(), done = false;
 
@@ -37,7 +37,7 @@ describe("Events", function(){
 
         evs.fireEvent('test',{a:"a",b:"b"});
         expect(done).toEqual(true, "Event should dispatch");
-        
+
     });
 
     it ("Should remove event properly", function(){
@@ -51,11 +51,11 @@ describe("Events", function(){
         evs.fireEvent('test');
 
         expect(counter).toEqual(1, "Events should have only cought on once");
-        
+
     });
-    
+
     it ("Should use addEventOnce properly", function(){
-        var evs = new Events(), counter =0;      
+        var evs = new Events(), counter =0;
 
         function count(){counter++;}
 
@@ -63,11 +63,11 @@ describe("Events", function(){
         evs.fireEvent('test');
         evs.fireEvent('test');
 
-        expect(counter).toEqual(1, "Events should have only cought on once");        
+        expect(counter).toEqual(1, "Events should have only cought on once");
     });
 
-    it ("Should use :once pseudo event properly", function(){  
-        var evs = new Events(), counter =0;      
+    it ("Should use :once pseudo event properly", function(){
+        var evs = new Events(), counter =0;
 
         function count(){counter++;}
 
@@ -75,8 +75,8 @@ describe("Events", function(){
         evs.fireEvent('test');
         evs.fireEvent('test');
 
-        expect(counter).toEqual(1, "Events should have only cought on once"); 
-        
+        expect(counter).toEqual(1, "Events should have only cought on once");
+
     });
 
     it ("Should use latched properly", function(){
@@ -89,26 +89,14 @@ describe("Events", function(){
         });
 
         expect(done).toEqual(true, "latched event should have fired");
-        
+
     });
-    
+
     it ("Should support adding pseudo events with parameter", function(){
         var evs = new Events(), counter = 0;
 
-        Events.Pseudoes.times = {
-            addEvent : function(type,fn,count){
-                var counter = 0, $this = this;
-
-                this.addEvent(type, function times(){
-                    fn.apply(null, arguments);
-                    counter++;
-                    if (counter == count) $this.removeEvent(type,times);
-                });
-            }       
-        };
-
         evs.addEvent('test:times(2)',function(){
-            counter++;    
+            counter++;
         });
 
         evs.fireEvent('test');
@@ -116,7 +104,7 @@ describe("Events", function(){
         evs.fireEvent('test');
 
         expect(counter).toEqual(2, "Event should fire exactly twice");
-        
+
     });
 
     it ("Should continue event loop even if a function raises an error", function(){
@@ -127,12 +115,27 @@ describe("Events", function(){
         evs.addEvent('test', function(){counter++;});
 
         setTimeout(function(){
-            evs.fireEvent('test');    
+            evs.fireEvent('test');
         },100);
 
         waitsFor(function(){ return counter==2; }, "Loop should continue", 100);
-        
+
     });
-    
-            
+
+     it ("Should support firing multiple event types", function(){
+         var evs = new Events(), count = 0;
+
+         evs.addEvent('test1', function(){count++;});
+         evs.addEvent('test2', function(){count++;});
+         evs.addEvent('test3', function(){count++;});
+
+         evs.fireEvent('test1');
+         evs.fireEvent('test2');
+         evs.fireEvent('test3');
+
+         expect(count).toEqual(3, "Should have increased counter 3 times");
+         
+
+     });
+     
 });

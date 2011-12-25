@@ -1,6 +1,6 @@
 !function(){
     var compat = 'createEvent' in document,
-        pseudo_regex = /([a-zA-Z.]+)(\:([a-zA-Z]*))?(\((.*)\))?/,
+        pseudo_regex = /([a-zA-Z0-9.]+)(\:([a-zA-Z]*))?(\((.*)\))?/,
         addEvent, fireEvent, removeEvent, addEventOnce, Events;
 
     function indexOf(arr, target){
@@ -36,7 +36,7 @@
 
         if (compat){
             ev = document.createEvent('UIEvents');
-            ev.initEvent(type, false, false);
+            ev.initUIEvent(type, false, false, window, 1);
         }else{
             ev = {};
         }
@@ -140,6 +140,18 @@
                 if (!this.$latched) this.$latched = {};
 
                 this.$latched[type] = {event : ev};
+            }
+        },
+
+        times : {
+            addEvent : function(type, fn, ammount){
+                var count = 0, $this = this;
+
+                this.addEvent(type, function times(){
+                    fn.apply(null, arguments);
+                    count+=1;
+                    if (count == ammount) $this.removeEvent(type,times);
+                });
             }
         }
     };
