@@ -118,7 +118,7 @@ describe("Events", function(){
             evs.fireEvent('test');
         },100);
 
-        waitsFor(function(){ return counter==2; }, "Loop should continue", 100);
+        waitsFor(function(){ return counter==2; }, "Loop should continue", 1000);
 
     });
 
@@ -137,5 +137,16 @@ describe("Events", function(){
          
 
      });
+
+     it ("Should fire delayed event", function(){
+         var evs = new Events, done = false;
+
+         evs.addEvent('test', function(){ done = true;});
+         evs.fireEvent('test:delayed(1000)');
+         expect(done).toEqual(false, "event shouldn't have fired yet");
+
+         waitsFor(function(){ return done; }, "Event should fire", 1000);
+     });
+     
      
 });

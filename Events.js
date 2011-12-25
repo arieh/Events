@@ -136,10 +136,11 @@
         },
 
         latched : {
-            fireEvent : function(type, ev){
+            fireEvent : function(type, args){
                 if (!this.$latched) this.$latched = {};
 
-                this.$latched[type] = {event : ev};
+                this.$latched[type] = {args : args};
+                this.fireEvent(type,args);
             }
         },
 
@@ -153,6 +154,20 @@
                     if (count == ammount) $this.removeEvent(type,times);
                 });
             }
+        },
+
+        delayed : {
+            addEvent : function(type, fn, delay){
+                this.addEvent(type, function(){
+                    setTimeout(fn,delay);    
+                });    
+            }, 
+            fireEvent : function(type, args, delay){
+                var $this = this;
+                setTimeout(function(){
+                    $this.fireEvent(type, args);
+                }, delay);
+            }
         }
     };
 
@@ -161,14 +176,17 @@
     addEvent = compat ?
         function(type,fn){
             var type = processType(type),
-                pseudo_fn = Events.Pseudoes[type.pseudo] && Events.Pseudoes[type.pseudo].addEvent;
+                pseudo_fn = Events.Pseudoes[type.pseudo] && Events.Pseudoes[type.pseudo].addEvent, 
+                args = this.$latched[type.name] && this.$latched[type.name].args,
+                ev;
 
             if (pseudo_fn){
                 return pseudo_fn.apply(this,[type.name,fn,type.args]);
             }
 
             if (this.$latched && this.$latched[type.name]){
-                fn.apply(null,[this.$latched[type.name].event]);
+                ev = createEvent(type.name, this, args);
+                fn.apply(null,[ev]);
             }
 
             this.$event_element.addEventListener(type.name,fn,false);
@@ -176,15 +194,17 @@
          } :
          function(type,fn){
             var type = processType(type),
-                pseudo_fn = Events.Pseudoes[type.pseudo] && Events.Pseudoes[type.pseudo].addEvent;
+                pseudo_fn = Events.Pseudoes[type.pseudo] && Events.Pseudoes[type.pseudo].addEvent,
+                args = this.$latched[type.name] && this.$latched[type.name].args,
+                ev;
 
             if (pseudo_fn){
                 return pseudo_fn.apply(this,[type.name,fn,type.args]);
             }
 
-            if (this.$latched[type.name]){
-                fn.apply(null,[this.$latched[type.name].event]);
-                return this;
+            if (this.$latched && this.$latched[type.name]){
+                ev = createEvent(type.name, args);
+                fn.apply(null,[ev]);
             }
 
             if (!this.$events[type.name]) this.$events[type.name] = [fn];
@@ -197,27 +217,30 @@
         function(type, args){
             var type = processType(type),
                 pseudo_fn = Events.Pseudoes[type.pseudo] && Events.Pseudoes[type.pseudo].fireEvent,
-                ev = createEvent(type.name, this, args);
+                ev;
+            
+            if (pseudo_fn){
+                return pseudo_fn.call(this,type.name,args);
+            }   
+            
+            ev = createEvent(type.name, this, args);
 
             this.$event_element.dispatchEvent(ev);
-
-            if (pseudo_fn){
-                pseudo_fn.call(this,type.name,ev);
-            }
 
             return this;
          } :
          function(type, args){
             var type = processType(type),
                 pseudo_fn = Events.Pseudoes[type.pseudo] && Events.Pseudoes[type.pseudo].fireEvent,
-                ev = createEvent(type.name, this, args),
-                i, fn;
+                ev, i, fn;
 
             if (pseudo_fn){
-                pseudo_fn.call(this,type.name,ev);
+                return pseudo_fn.call(this,type.name,args);
             }
 
             if (!this.$events[type.name]) return this;
+
+            ev = createEvent(type.name, this, args);
 
             for (i=0; fn = this.$events[type.name]; i++){
                 fn.apply(null,[ev]);
