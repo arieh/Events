@@ -20,7 +20,7 @@ The simplest way to enable events support is like this:
 
 
     function MyObject(){
-        Events.call(this);    
+        Events.call(this);
     }
 
 
@@ -58,22 +58,25 @@ Dispathces an event, passing arguments:
 
 ###removeEvent(type, fn)
 Removes a listener.
-    
+
     obj.removeEvent('show', this.bound.handleShow);
 
 ###addEventOnce(type, fn)
 Same as `addEvent` only it will remove the listener automatically once dispatched.
 
 ##Pseudo events
-The library supports 2 specific pseudo events:
-  
+The library supports a few pseudo events out of the box:
+
   1. `:once` - when used event will be added once.
   2. `:latched` - see latched section
-
+  3. `:times(number)` - same as once, only it will execute X times (as passed by parameter).
+  4. `:delayed(ms)` - on `fireEvent`, will delay X miliseconds before firing the event. On `addEvent` will delay each execution of specific function.
 
     obj.addEvent('test:once', function(){/* ... */ });
-    
+
     obj.fireEvent('load:latched');
+
+    obj.addEvent('test:times(5)', fn);
 
 You can also add your own pseudo events, by adding them to Events.Pseudoes.
 In order to create a new pseudo-event, add an object to the collection, containing either `addEvent` method, `fireEvent` method or both.
@@ -83,8 +86,8 @@ For example:
     Events.Pseudoes.delayed = {
         addEvent : function(type, fn, time){
             this.addEvent(type, function(){
-                setTimeout(fn, time);    
-            });    
+                setTimeout(fn, time);
+            });
         }
     };
 
@@ -92,19 +95,17 @@ This will allow you to do:
 
     obj.addEvent('test:delayed(1000)', fn);//will add a delayed event
 
-Some important notes:
-  * the `addEvent` method will be fired *instead* of the default `addEvent` method. It's arguments will be `event-type`, the function, and passed parameter (if exists).
-  * the `fireEvent` method will be fire *after* the default `fireEvent` method. It's arguments will be `event-type` and the event created by the method.
+The `addEvent` and `fireEvent` methods will be fired *instead* of the default methods. It's arguments will be the same as their default, with a third argument, which is the passed pseudo-parameter (if any).
 
 ##Latched events
-Latched events are events that once fired once will dispatch automatically afterwards. Examples for such events can be 
+Latched events are events that once fired once will dispatch automatically afterwards. Examples for such events can be
 a 'load' event, or a 'domready' event. If any arguments were passed, they will be passed on as well. For example:
 
     obj.fireEvent('load:latched',{someParam:"a"});
 
     //will be fire automatically
-    obj.addEvent('load', function(e){  
-        e.args.someParam; //a    
+    obj.addEvent('load', function(e){
+        e.args.someParam; //a
     });
 
 
