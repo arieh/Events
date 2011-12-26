@@ -72,30 +72,24 @@ The library supports a few pseudo events out of the box:
   3. `:times(number)` - same as once, only it will execute X times (as passed by parameter).
   4. `:delayed(ms)` - on `fireEvent`, will delay X miliseconds before firing the event. On `addEvent` will delay each execution of specific function.
 
-    obj.addEvent('test:once', function(){/* ... */ });
 
-    obj.fireEvent('load:latched');
+    obj.addEvent('test:once', function(){/* ... */ }); //will add a function to be fired once
 
-    obj.addEvent('test:times(5)', fn);
+    obj.fireEvent('load:latched'); //will fire a latched event
+
+    obj.addEvent('test:times(5)', fn); //will add an event that will remove itself after 5 runs
+
+    obj.addEvent('test:delayed(500)',fn); //will add an event that will wait 500ms before executing when fired
+
+    obj.fireEvent('test:delayed(500)',args); //will wait 500ms before firing the event
+
 
 You can also add your own pseudo events, by adding them to Events.Pseudoes.
 In order to create a new pseudo-event, add an object to the collection, containing either `addEvent` method, `fireEvent` method or both.
 You can even add a parameter to the pseudo-event.
-For example:
-
-    Events.Pseudoes.delayed = {
-        addEvent : function(type, fn, time){
-            this.addEvent(type, function(){
-                setTimeout(fn, time);
-            });
-        }
-    };
-
-This will allow you to do:
-
-    obj.addEvent('test:delayed(1000)', fn);//will add a delayed event
-
 The `addEvent` and `fireEvent` methods will be fired *instead* of the default methods. It's arguments will be the same as their default, with a third argument, which is the passed pseudo-parameter (if any).
+In order to see more simply look at the code.
+
 
 ##Latched events
 Latched events are events that once fired once will dispatch automatically afterwards. Examples for such events can be
