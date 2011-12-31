@@ -91,6 +91,12 @@ The `addEvent` and `fireEvent` methods will be fired *instead* of the default me
 In order to see more simply look at the code.
 
 
+###Important note
+The library *does not support multiple pseudo events*. This is by design - the pseudo events hide complex logic and function-wrapping.
+Doing `addEvent:once:delayed(1000)` might look nice, but hides the fact that it uses 3 levels of function wrapping.
+By default, The library would simply fail to assign the pseudo event properly (will try to match `once:delayed` which doesn't exist), and will log an error to the console.
+However, you can make the librart throw exceptions for multiple pseudo events by setting the `Events.strict` flag to true.
+
 ##Latched events
 Latched events are events that once fired once will dispatch automatically afterwards. Examples for such events can be
 a 'load' event, or a 'domready' event. If any arguments were passed, they will be passed on as well. For example:
