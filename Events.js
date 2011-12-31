@@ -1,6 +1,6 @@
 !function(){
     var compat = 'createEvent' in document,
-        pseudo_regex = /([a-zA-Z0-9.]+)(\:([a-zA-Z]*))?(\((.*)\))?/,
+        pseudo_regex = /([^:]+)(?:\:([^(]*)(?:\((.*)\))?)?/,
         addEvent, fireEvent, removeEvent, addEventOnce, Events, fireLatchedEvent;
 
     //=================
@@ -27,10 +27,13 @@
     //returns a structured data object about a type's pseudo-events
     function getPseudo(string){
         var match = string.match(pseudo_regex);
+
+        if (string.split(':').length > 2) throw new RangeError("Library does not support multiple pseudo events");
+
         return {
             name : match[1],
-            pseudo : match[3],
-            args : match[5]
+            pseudo : match[2],
+            args : match[3]
         };
     }
 
@@ -54,6 +57,17 @@
         ev.args = args;
 
         return ev;
+    }
+
+    //handles warnings set by the library
+    function warn(error){
+        if (Events.strict){
+            throw new Error(error);    
+        }else if (window['console']){
+            if (console.error) console.error(error);
+            else if (console.warn) console.warn(error);
+            else console.log(error);
+        }
     }
 
     /**
@@ -134,6 +148,7 @@
     Events.removeOn = removeOn;
     Events.getPseudos = getPseudo;
     Events.processType = processType;
+    Events.strict = false;
 
     /*
      * Events.Pesudoes allows you to add pseudo behaviors
