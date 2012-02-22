@@ -141,6 +141,8 @@
 
         this.addEvent('destroy',function(){
             $this.$event_element = null;
+            $this.$latched = null;
+            $this.$events = null;
         });
     };
 
