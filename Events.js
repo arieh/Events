@@ -223,12 +223,13 @@
                 return pseudo_fn.apply(this,[data.name,fn,data.args]);
             }
 
+            this.$event_element.addEventListener(data.name,fn,false);
+
             if (this.$latched && this.$latched[data.name]){
                 ev = createEvent(data.name, this, args);
                 fn.apply(null,[ev]);
             }
 
-            this.$event_element.addEventListener(data.name,fn,false);
             return this;
          } :
          function(type,fn){
@@ -239,15 +240,15 @@
 
             if (pseudo_fn){
                 return pseudo_fn.apply(this,[data.name,fn,data.args]);
-            }
+            } 
+
+            if (!this.$events[data.name]) this.$events[data.name] = [fn];
+            else this.$evetns[data.name].push(fn);
 
             if (this.$latched && this.$latched[data.name]){
                 ev = createEvent(data.name, args);
                 fn.apply(null,[ev]);
             }
-
-            if (!this.$events[data.name]) this.$events[data.name] = [fn];
-            else this.$evetns[data.name].push(fn);
 
             return this;
         };
