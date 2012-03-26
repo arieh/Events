@@ -70,7 +70,7 @@ The library supports a few pseudo events out of the box:
   1. `:once` - when used event will be added once.
   2. `:latched` - see latched section
   3. `:times(number)` - same as once, only it will execute X times (as passed by parameter).
-  4. `:delayed(ms)` - on `fireEvent`, will delay X miliseconds before firing the event. On `addEvent` will delay each execution of specific function.
+  4. `:delay(ms)` - on `fireEvent`, will delay X miliseconds before firing the event. On `addEvent` will delay each execution of specific function.
 
 
     obj.addEvent('test:once', function(){/* ... */ }); //will add a function to be fired once
@@ -79,9 +79,9 @@ The library supports a few pseudo events out of the box:
 
     obj.addEvent('test:times(5)', fn); //will add an event that will remove itself after 5 runs
 
-    obj.addEvent('test:delayed(500)',fn); //will add an event that will wait 500ms before executing when fired
+    obj.addEvent('test:delay(500)',fn); //will add an event that will wait 500ms before executing when fired
 
-    obj.fireEvent('test:delayed(500)',args); //will wait 500ms before firing the event
+    obj.fireEvent('test:delay(500)',args); //will wait 500ms before firing the event
 
 
 You can also add your own pseudo events, by adding them to Events.Pseudoes.
@@ -93,8 +93,8 @@ In order to see more simply look at the code.
 
 ###Important note
 The library *does not support multiple pseudo events*. This is by design - the pseudo events hide complex logic and function-wrapping.
-Doing `addEvent:once:delayed(1000)` might look nice, but hides the fact that it uses 3 levels of function wrapping.
-By default, The library would simply fail to assign the pseudo event properly (will try to match `once:delayed` which doesn't exist), and will log an error to the console.
+Doing `addEvent:once:delay(1000)` might look nice, but hides the fact that it uses 3 levels of function wrapping.
+By default, The library would simply fail to assign the pseudo event properly (will try to match `once:delay` which doesn't exist), and will log an error to the console.
 However, you can make the librart throw exceptions for multiple pseudo events by setting the `Events.strict` flag to true.
 
 ##Latched events

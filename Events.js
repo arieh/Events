@@ -139,7 +139,7 @@
          */
         this.fireLatchedEvent = fireLatchedEvent;
 
-        this.addEvent('destroy',function(){
+        this.addEvent('destroy:delay(0)',function(){
             $this.$event_element = null;
             $this.$latched = null;
             $this.$events = null;
@@ -190,7 +190,7 @@
             }
         },
 
-        delayed : {
+        delay : {
             addEvent : function(type, fn, delay){
                 this.addEvent(type, function(){
                     setTimeout(fn,delay);
