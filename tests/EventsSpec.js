@@ -149,7 +149,7 @@ describe("Events", function(){
          var evs = new TestObj(), done = false;
 
          evs.addEvent('test', function(){ done = true;});
-         evs.fireEvent('test:delayed(1000)');
+         evs.fireEvent('test:delay(1000)');
          expect(done).toEqual(false, "event shouldn't have fired yet");
 
          waitsFor(function(){ return done; }, "Event should fire", 1000);
