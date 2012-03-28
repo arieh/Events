@@ -177,5 +177,28 @@ describe("Events", function(){
             expect(method in obj).toEqual(true, "Object should have method "+method);
         } 
      });
+
+     it ("Should support removing events that were added once", function(){
+         var evs = new TestObj(), count =0, done;
+
+        function test(){
+            count++;    
+        }
+        
+        evs.addEventOnce('test', test);
+
+        evs.addEvent('test', function(){
+            done = true;
+            expect(count).toEqual(0, "function should have been removed");
+        });
+
+        evs.removeEvent('test', test);
+
+        evs.fireEvent('test');
+
+        waitsFor(function(){ return done; }, "event should have been fired", 1000);
+        
+     });
+     
      
 });
