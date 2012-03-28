@@ -88,6 +88,7 @@
         }
 
         this.$latched = {};
+        this.$once    = {};
 
         /**
          * Adds an event
@@ -208,125 +209,113 @@
     //globaly expose Mixin
     this.Events = Events;
 
+    //========================
+    // cross-browser utilities
+    //========================
+
+    function register(obj, type, fn){
+        if (compat){
+            obj.$event_element.addEventListener(type,fn,false);
+        }else{
+            if (!obj.$events[type]) obj.$events[type] = [fn];
+            else obj.$evetns[type].push(fn);     
+        }
+    }
+
+
+    function dispatch(obj,type, ev){
+        var i, fn;
+
+        if (compat){
+            obj.$event_element.dispatchEvent(ev);
+        }else{
+            for (i=0; fn = obj.$events[type]; i++){
+                fn.apply(null,[ev]);
+            } 
+        }    
+    }
+
+    function remove(obj, type, fn){
+        var index;  
+
+        if (compat){
+            obj.$event_element.removeEventListener(type,fn,false);   
+        }else{ 
+            if (!obj.$events[type]) return;
+
+            index = indexOf(obj.$events[type],fn);
+
+            if (index <0) return;
+
+            obj.$events[type].splice(index,1); 
+        }
+    }
+
     //=======================
     // Function Declarations
     //=======================
+    
+    addEvent = function addEvent(type,fn){
+        var data = processType(type),
+            pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].addEvent,
+            args = this.$latched[data.name] && this.$latched[data.name].args,
+            ev;
 
-    addEvent = compat ?
-        function(type,fn){
-            var data = processType(type),
-                pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].addEvent,
-                args = this.$latched[data.name] && this.$latched[data.name].args,
-                ev;
+        if (pseudo_fn){
+            return pseudo_fn.apply(this,[data.name,fn,data.args]);
+        }
 
-            if (pseudo_fn){
-                return pseudo_fn.apply(this,[data.name,fn,data.args]);
-            }
+        register(this,data.name, fn);
 
-            this.$event_element.addEventListener(data.name,fn,false);
-
-            if (this.$latched && this.$latched[data.name]){
-                ev = createEvent(data.name, this, args);
-                fn.apply(null,[ev]);
-            }
-
-            return this;
-         } :
-         function(type,fn){
-            var data = processType(type),
-                pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].addEvent,
-                args = this.$latched[data.name] && this.$latched[data.name].args,
-                ev;
-
-            if (pseudo_fn){
-                return pseudo_fn.apply(this,[data.name,fn,data.args]);
-            } 
-
-            if (!this.$events[data.name]) this.$events[data.name] = [fn];
-            else this.$evetns[data.name].push(fn);
-
-            if (this.$latched && this.$latched[data.name]){
-                ev = createEvent(data.name, args);
-                fn.apply(null,[ev]);
-            }
-
-            return this;
-        };
-
-    fireEvent = compat ?
-        function(type, args){
-            var data = processType(type),
-                pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].fireEvent,
-                ev;
-
-            if (pseudo_fn){
-                return pseudo_fn.call(this,data.name,args);
-            }
-
+        if (this.$latched && this.$latched[data.name]){
             ev = createEvent(data.name, this, args);
+            fn.apply(null,[ev]);
+        }
 
-            this.$event_element.dispatchEvent(ev);
+        return this;
+     };
 
-            return this;
-         } :
-         function(type, args){
-            var data = processType(type),
-                pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].fireEvent,
-                ev, i, fn;
+    fireEvent = function fireEvent(type, args){
+        var data = processType(type),
+            pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].fireEvent,
+            ev, fn;
 
-            if (pseudo_fn){
-                return pseudo_fn.call(this,data.name,args);
-            }
+        if (pseudo_fn){
+            return pseudo_fn.call(this,data.name,args);
+        }
 
-            if (!this.$events[data.name]) return this;
+        ev = createEvent(data.name, this, args);
 
-            ev = createEvent(data.name, this, args);
+        dispatch(this,data.name,ev);
 
-            for (i=0; fn = this.$events[data.name]; i++){
-                fn.apply(null,[ev]);
-            }
+        if (!this.$once[data.name]) return this;
 
-            if (pseudo_fn){
-                Events.Pseudoes[data.pseudo].fireEvent.call(this,data,ev);
-            }
+        while (fn = this.$once[data.name].pop()){
+            this.removeEvent(data.name, fn);    
+        }
 
-            return this;
-         };
+        return this;
+     };
 
-    removeEvent = compat ?
-        function(type, fn){
-            var data = processType(type);
+    removeEvent = function removeEvent(type, fn){
+        var data = processType(type);
 
-            this.$event_element.removeEventListener(data.name,fn,false);
-
-            return this;
-        } : function(type, fn){
-            var index,
-                data = processType(type);
-            if (!this.$events[data.name]) return this;
-
-            index = indexOf(this.$events[data.name],fn);
-
-            if (index <0) return this;
-
-            this.$events[data.name].splice(index,1);
-
-            return this;
-        };
-
-    addEventOnce = function(type, fn){
-        var $this = this,
-            data = processType(type);
-
-        this.addEvent(data.name, function once(e){
-            fn.apply(null,[e]);
-            $this.removeEvent(data.name,once);
-        });
+        remove(this,data.name, fn);
 
         return this;
     };
 
-    fireLatchedEvent = function(type, args){
+    addEventOnce = function addEventOnce(type, fn){
+        var $this = this,
+            data = processType(type);
+
+        if (!this.$once[data.name]) this.$once[data.name] = [];
+        this.$once[data.name].push(fn);
+
+        return this.addEvent(data.name, fn);
+    };
+
+    fireLatchedEvent = function fireLatchedEvent(type, args){
         if (!this.$latched) this.$latched = {};
 
         this.$latched[type] = {args : args};
