@@ -218,7 +218,9 @@
             obj.$event_element.addEventListener(type,fn,false);
         }else{
             if (!obj.$events[type]) obj.$events[type] = [fn];
-            else obj.$evetns[type].push(fn);     
+            else if (obj.$events[type].indexOf(fn)==-1){
+                obj.$evetns[type].push(fn);     
+            } 
         }
     }
 
@@ -298,9 +300,14 @@
      };
 
     removeEvent = function removeEvent(type, fn){
-        var data = processType(type);
+        var data = processType(type),
+            index;
 
         remove(this,data.name, fn);
+
+        if (this.$once[data.name] && (index = this.$once[data.name].indexOf(fn))>-1){
+            this.$once[data.name].splice(index,1);    
+        }
 
         return this;
     };
