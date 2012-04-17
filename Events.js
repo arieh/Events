@@ -24,11 +24,22 @@
         });
     }
 
+    //handles warnings set by the library
+    function warn(error){
+        if (Events.strict){
+            throw new Error(error);
+        }else if ('console' in window){
+            if (console.error) console.error(error);
+            else if (console.warn) console.warn(error);
+            else console.log(error);
+        }
+    }
+
     //returns a structured data object about a type's pseudo-events
     function getPseudo(string){
         var match = string.match(pseudo_regex);
 
-        if (string.split(':').length > 2) throw new RangeError("Library does not support multiple pseudo events");
+        if (string.split(':').length > 2) warn("Library does not support multiple pseudo events");
 
         return {
             name : match[1],
@@ -42,7 +53,14 @@
         return getPseudo(removeOn(type));
     }
 
-    //cross-browser function to create event object for fire method
+    /*
+     * cross-browser function to create event object for fire method
+     *
+     * Created object will always have following properties:
+     *  - dispatcher: a reference to dispatching object (since we can't use 'this')
+     *  - args: arguments passed alongside the event
+     *  - object_event: a flag set to true to easily check if this is an object event or a normal DOM event.
+     */
     function createEvent(type, dis, args){
         var ev;
 
@@ -55,20 +73,12 @@
 
         ev.dispatcher = dis;
         ev.args = args;
+        ev.object_event = true;
 
         return ev;
     }
 
-    //handles warnings set by the library
-    function warn(error){
-        if (Events.strict){
-            throw new Error(error);    
-        }else if (window['console']){
-            if (console.error) console.error(error);
-            else if (console.warn) console.warn(error);
-            else console.log(error);
-        }
-    }
+
 
     /**
      * Events Provider.
@@ -140,10 +150,13 @@
          */
         this.fireLatchedEvent = fireLatchedEvent;
 
+        //since this code removes the reference to the events provider,
+        //we want to make sure it runs after the rest of the loop is done.
         this.addEvent('destroy:delay(0)',function(){
-            $this.$event_element = null;
-            $this.$latched = null;
-            $this.$events = null;
+            var names = "$event_element $latched $events $once addEvent removeEvent addEventOnce fireLatchedEvent".split(' '),
+                i, name;
+
+            for (i=0; name = names[i]; i++) $this[name] = null;
         });
     };
 
@@ -206,7 +219,7 @@
         }
     };
 
-    //globaly expose Mixin
+    //expose Mixin to provided namespace
     this.Events = Events;
 
     //========================
@@ -219,8 +232,8 @@
         }else{
             if (!obj.$events[type]) obj.$events[type] = [fn];
             else if (obj.$events[type].indexOf(fn)==-1){
-                obj.$evetns[type].push(fn);     
-            } 
+                obj.$evetns[type].push(fn);
+            }
         }
     }
 
@@ -233,30 +246,30 @@
         }else{
             for (i=0; fn = obj.$events[type]; i++){
                 fn.apply(null,[ev]);
-            } 
-        }    
+            }
+        }
     }
 
     function remove(obj, type, fn){
-        var index;  
+        var index;
 
         if (compat){
-            obj.$event_element.removeEventListener(type,fn,false);   
-        }else{ 
+            obj.$event_element.removeEventListener(type,fn,false);
+        }else{
             if (!obj.$events[type]) return;
 
             index = indexOf(obj.$events[type],fn);
 
             if (index <0) return;
 
-            obj.$events[type].splice(index,1); 
+            obj.$events[type].splice(index,1);
         }
     }
 
     //=======================
     // Function Declarations
     //=======================
-    
+
     addEvent = function addEvent(type,fn){
         var data = processType(type),
             pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].addEvent,
@@ -293,11 +306,11 @@
         if (!this.$once[data.name]) return this;
 
         while (fn = this.$once[data.name].pop()){
-            this.removeEvent(data.name, fn);    
+            this.removeEvent(data.name, fn);
         }
 
         return this;
-     };
+    };
 
     removeEvent = function removeEvent(type, fn){
         var data = processType(type),
@@ -306,7 +319,7 @@
         remove(this,data.name, fn);
 
         if (this.$once[data.name] && (index = this.$once[data.name].indexOf(fn))>-1){
-            this.$once[data.name].splice(index,1);    
+            this.$once[data.name].splice(index,1);
         }
 
         return this;
