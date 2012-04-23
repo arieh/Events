@@ -349,7 +349,9 @@
             data = processType(type);
 
         if (!this.$once[data.name]) this.$once[data.name] = [];
-        this.$once[data.name].push(fn);
+        if (this.$once[data.name].indexOf(fn) == -1){
+            this.$once[data.name].push(fn);
+        } 
 
         return this.addEvent(data.name, fn);
     };
