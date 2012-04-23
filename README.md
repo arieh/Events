@@ -50,6 +50,13 @@ Adds a listener. When fired, the function will be passed an event object, with 2
         e.args; //whatever arguments were passed
     });
 
+###addEvents(events)
+Adds multiple events in one callback
+
+    obj.addEvents({
+        'show' : show_fn,
+        'hide' : hide_fn
+    });
 
 ###fireEvent(type, args)
 Dispathces an event, passing arguments:

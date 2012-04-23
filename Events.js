@@ -1,7 +1,7 @@
 !function(){
     var compat = 'createEvent' in document,
         pseudo_regex = /([^:]+)(?:\:([^(]*)(?:\((.*)\))?)?/,
-        addEvent, fireEvent, removeEvent, addEventOnce, Events, fireLatchedEvent;
+        addEvent, addEvents, fireEvent, removeEvent, addEventOnce, Events, fireLatchedEvent;
 
     //=================
     //    UTILITIES
@@ -109,6 +109,15 @@
          * @return this
          */
         this.addEvent = addEvent;
+
+        /**
+         * Helper to add multiple events at once
+         *
+         * @param {Object} literal object of event types => callbacks
+         *
+         * @return this
+         */
+        this.addEvents = addEvents;
 
         /**
          * dispatches an event
@@ -289,6 +298,16 @@
 
         return this;
      };
+
+    addEvents = function addEvents(events){
+        var type;
+        
+        for (type in events) if (events.hasOwnProperty(type)){
+            this.addEvent(type, events[type]);    
+        }
+
+        return this;
+    };
 
     fireEvent = function fireEvent(type, args){
         var data = processType(type),

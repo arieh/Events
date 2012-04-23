@@ -17,6 +17,27 @@ describe("Events", function(){
         expect(done).toEqual(true, "Event to be fired");
     });
 
+    it ("Should add multiple events using addEvents", function(){
+        var evs = new TestObj(), done = 0;
+
+        function run(){
+            done++;    
+        }
+
+        evs.addEvents({
+            'test1' : run,
+            'test2' : run,
+            'test3' : run
+        });
+
+        evs.fireEvent('test1');
+        evs.fireEvent('test2');
+        evs.fireEvent('test3');
+
+        expect(done).toEqual(3, "All 3 events should have executed function");
+    });
+    
+
     it ("Should fire all events", function(){
         var evs = new TestObj(), result = 0;
 
