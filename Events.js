@@ -312,32 +312,37 @@
     fireEvent = function fireEvent(type, args){
         var data = processType(type),
             pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].fireEvent,
-            ev, fn;
+            ev, fn,
+            once_arr,
+            temp_arr;
 
         if (pseudo_fn){
             return pseudo_fn.call(this,data.name,args);
         }
 
+        once_arr = this.$once[data.name];
+        this.$once[data.name] = null;
+        
         ev = createEvent(data.name, this, args);
 
         dispatch(this,data.name,ev);
 
-        if (!this.$once[data.name]) return this;
+        if (!once_arr) return this;
 
-        while (fn = this.$once[data.name].pop()){
-            this.removeEvent(data.name, fn);
+        while (fn = once_arr.pop()){
+            this.removeEvent(data.name, fn, true);
         }
 
         return this;
     };
 
-    removeEvent = function removeEvent(type, fn){
+    removeEvent = function removeEvent(type, fn,no_once){
         var data = processType(type),
             index;
 
         remove(this,data.name, fn);
 
-        if (this.$once[data.name] && (index = this.$once[data.name].indexOf(fn))>-1){
+        if (!no_once && this.$once[data.name] && (index = this.$once[data.name].indexOf(fn))>-1){
             this.$once[data.name].splice(index,1);
         }
 
