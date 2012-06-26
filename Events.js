@@ -1,4 +1,8 @@
 !function(){
+    /**
+     * @module Events
+     */
+
     var compat = 'createEvent' in document,
         pseudo_regex = /([^:]+)(?:\:([^(]*)(?:\((.*)\))?)?/,
         addEvent, addEvents, fireEvent, removeEvent, addEventOnce, Events, fireLatchedEvent;
@@ -17,13 +21,6 @@
         return -1;
     }
 
-    //removes the on* prefix from event names
-    function removeOn(string){
-        return string.replace(/^on([A-Z])/, function(full, first){
-            return first.toLowerCase();
-        });
-    }
-
     //handles warnings set by the library
     function warn(error){
         if (Events.strict){
@@ -35,7 +32,32 @@
         }
     }
 
-    //returns a structured data object about a type's pseudo-events
+    /**
+     * removes the on* prefix from event names
+     * @method Events.removeOn
+     * @static
+     *
+     * @param {string} type
+     *
+     * @return {string}
+     */
+    function removeOn(string){
+        return string.replace(/^on([A-Z])/, function(full, first){
+            return first.toLowerCase();
+        });
+    }
+
+    /**
+     * returns a structured data object about a type's pseudo-events
+     *
+     * @method getPseudo
+     * @private
+     * @static
+     *
+     * @param {string} type
+     *
+     * @return {Object} data
+     */
     function getPseudo(string){
         var match = string.match(pseudo_regex);
 
@@ -48,18 +70,37 @@
         };
     }
 
-    //returns an object with needed type about event type
+    /**
+     * proccesses an event type, returning a valid data object from that name
+     * @method processType
+     * @static
+     * @private
+     *
+     * @param {string} type
+     *
+     * @return {Object} data
+     */
     function processType(type){
         return getPseudo(removeOn(type));
     }
 
-    /*
+    /**
      * cross-browser function to create event object for fire method
      *
      * Created object will always have following properties:
      *  - dispatcher: a reference to dispatching object (since we can't use 'this')
      *  - args: arguments passed alongside the event
      *  - object_event: a flag set to true to easily check if this is an object event or a normal DOM event.
+     *
+     * @method Events.createEvent
+     * @static
+     * @private
+     *
+     * @param {string} type
+     * @param {object} dispatcher
+     * @param {mixed} args
+     *
+     * @return event object
      */
     function createEvent(type, dis, args){
         var ev;
@@ -85,8 +126,10 @@
      *
      * Can function either as a standalone or a Mixin
      *
-     * @param {Element} el element to use as event target. Optional
+     * @class Events
+     * @constructor
      *
+     * @param {Element} el element to use as event target. Optional
      */
     Events = function Events(el){
         var $this = this;
@@ -100,63 +143,11 @@
         this.$latched = {};
         this.$once    = {};
 
-        /**
-         * Adds an event
-         *
-         * @param {String}    the event type
-         * @param {Function}  a function to add
-         *
-         * @return this
-         */
         this.addEvent = addEvent;
-
-        /**
-         * Helper to add multiple events at once
-         *
-         * @param {Object} literal object of event types => callbacks
-         *
-         * @return this
-         */
         this.addEvents = addEvents;
-
-        /**
-         * dispatches an event
-         *
-         * @param {String} event type
-         * @param {Mixed}  arguments to pass with the event
-         *
-         * @return this
-         */
         this.fireEvent = fireEvent;
-
-        /**
-         * removes a function from an event
-         *
-         * @param {String}   event type
-         * @param {Function} function to remove from stack
-         *
-         * @return this
-         */
         this.removeEvent = removeEvent;
-
-        /**
-         * Adds an event for one execution, then removes it
-         *
-         * @param {String}    the event type
-         * @param {Function}  a function to add
-         *
-         * @return this
-         */
         this.addEventOnce = addEventOnce;
-
-        /**
-         * Fires a latched event
-         *
-         * @param {String} the event type
-         * @param {Mixed}  arguments to pass with the event
-         *
-         * @return this
-         */
         this.fireLatchedEvent = fireLatchedEvent;
 
         //since this code removes the reference to the events provider,
@@ -173,6 +164,7 @@
     Events.removeOn = removeOn;
     Events.getPseudos = getPseudo;
     Events.processType = processType;
+    Events.createEvent = createEvent;
     Events.strict = false;
 
     /*
@@ -187,6 +179,10 @@
      * the event name and the event object created
      *
      * Look at examples to see how it can be used
+     *
+     * @property Events.Pseudoes
+     * @type {object}
+     * @static
      */
     Events.Pseudoes = {
         once : {
@@ -227,9 +223,6 @@
             }
         }
     };
-
-    //expose Mixin to provided namespace
-    this.Events = Events;
 
     //========================
     // cross-browser utilities
@@ -279,6 +272,17 @@
     // Function Declarations
     //=======================
 
+
+    /**
+     * Adds an event
+     *
+     * @method addEvent
+     *
+     * @param {String}    the event type
+     * @param {Function}  a function to add
+     *
+     * @chainable
+     */
     addEvent = function addEvent(type,fn){
         var data = processType(type),
             pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].addEvent,
@@ -299,16 +303,35 @@
         return this;
      };
 
+    /**
+     * Helper to add multiple events at once
+     *
+     * @method addEvents
+     *
+     * @param {Object} literal object of event types => callbacks
+     *
+     * @chainable
+     */
     addEvents = function addEvents(events){
         var type;
-        
+
         for (type in events) if (events.hasOwnProperty(type)){
-            this.addEvent(type, events[type]);    
+            this.addEvent(type, events[type]);
         }
 
         return this;
     };
 
+    /**
+     * dispatches an event
+     *
+     * @method fireEvent
+     *
+     * @param {String} event type
+     * @param {Mixed}  arguments to pass with the event
+     *
+     * @chainable
+     */
     fireEvent = function fireEvent(type, args){
         var data = processType(type),
             pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].fireEvent,
@@ -320,9 +343,11 @@
             return pseudo_fn.call(this,data.name,args);
         }
 
+        //in case one of the callbacks will try and add another once event,
+        //we keep a reference of the once stack, and then empty it
         once_arr = this.$once[data.name];
         this.$once[data.name] = null;
-        
+
         ev = createEvent(data.name, this, args);
 
         dispatch(this,data.name,ev);
@@ -336,6 +361,16 @@
         return this;
     };
 
+    /**
+     * removes a function from an event
+     *
+     * @method removeEvent
+     *
+     * @param {String}   event type
+     * @param {Function} function to remove from stack
+     *
+     * @chainable
+     */
     removeEvent = function removeEvent(type, fn,no_once){
         var data = processType(type),
             index;
@@ -349,6 +384,16 @@
         return this;
     };
 
+    /**
+     * Adds an event for one execution, then removes it
+     *
+     * @method addEventOnce
+     *
+     * @param {String}    the event type
+     * @param {Function}  a function to add
+     *
+     * @chainable
+     */
     addEventOnce = function addEventOnce(type, fn){
         var $this = this,
             data = processType(type);
@@ -356,11 +401,21 @@
         if (!this.$once[data.name]) this.$once[data.name] = [];
         if (this.$once[data.name].indexOf(fn) == -1){
             this.$once[data.name].push(fn);
-        } 
+        }
 
         return this.addEvent(data.name, fn);
     };
 
+    /**
+     * Fires a latched event
+     *
+     * @method fireLatchedEvent
+     *
+     * @param {String} the event type
+     * @param {Mixed}  arguments to pass with the event
+     *
+     * @chainable
+     */
     fireLatchedEvent = function fireLatchedEvent(type, args){
         if (!this.$latched) this.$latched = {};
 
@@ -368,8 +423,9 @@
         this.fireEvent(type,args);
 
         return this;
-    };
+    };     
 
-
+    //expose Mixin to provided namespace
+    this.Events = Events;     
 }.call(this);
 
