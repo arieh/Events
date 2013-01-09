@@ -157,6 +157,8 @@
                 i, name;
 
             for (i=0; name = names[i]; i++) $this[name] = null;
+
+            this.$events_destroyed = true;
         });
     };
 
@@ -284,6 +286,8 @@
      * @chainable
      */
     addEvent = function addEvent(type,fn){
+        if (this.$events_destroyed) return this;
+
         var data = processType(type),
             pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].addEvent,
             args = this.$latched[data.name] && this.$latched[data.name].args,
@@ -313,6 +317,7 @@
      * @chainable
      */
     addEvents = function addEvents(events){
+        if (this.$events_destroyed) return this;
         var type;
 
         for (type in events) if (events.hasOwnProperty(type)){
@@ -333,6 +338,7 @@
      * @chainable
      */
     fireEvent = function fireEvent(type, args){
+        if (this.$events_destroyed) return this;
         var data = processType(type),
             pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].fireEvent,
             ev, fn,
@@ -372,6 +378,7 @@
      * @chainable
      */
     removeEvent = function removeEvent(type, fn,no_once){
+        if (this.$events_destroyed) return this;
         var data = processType(type),
             index;
 
@@ -395,6 +402,7 @@
      * @chainable
      */
     addEventOnce = function addEventOnce(type, fn){
+        if (this.$events_destroyed) return this;
         var $this = this,
             data = processType(type);
 
@@ -417,6 +425,7 @@
      * @chainable
      */
     fireLatchedEvent = function fireLatchedEvent(type, args){
+        if (this.$events_destroyed) return this;
         if (!this.$latched) this.$latched = {};
 
         this.$latched[type] = {args : args};
