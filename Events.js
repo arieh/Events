@@ -12,13 +12,9 @@
     //=================
 
     //utility function for cross-browser
-    function indexOf(arr, target){
-        var i, item;
-        if (arr.indexOf) return arr.indexOf(target);
-
-        for(i=0; item = arr[i]; i++) if (item == target) return i;
-
-        return -1;
+    function indexOf(arr,prop){
+        if (arr.indexOf) return arr.indexOf(prop);
+        else return String.prototype.indexOf(arr,prop);
     }
 
     //handles warnings set by the library
@@ -235,7 +231,7 @@
             obj.$event_element.addEventListener(type,fn,false);
         }else{
             if (!obj.$events[type]) obj.$events[type] = [fn];
-            else if (obj.$events[type].indexOf(fn)==-1){
+            else if (indexOf(obj.$events[type],fn)==-1){
                 obj.$evetns[type].push(fn);
             }
         }
@@ -384,7 +380,7 @@
 
         remove(this,data.name, fn);
 
-        if (!no_once && this.$once[data.name] && (index = this.$once[data.name].indexOf(fn))>-1){
+        if (!no_once && this.$once[data.name] && (index = indexOf(this.$once[data.name],fn))>-1){
             this.$once[data.name].splice(index,1);
         }
 
@@ -407,7 +403,7 @@
             data = processType(type);
 
         if (!this.$once[data.name]) this.$once[data.name] = [];
-        if (this.$once[data.name].indexOf(fn) == -1){
+        if (indexOf(this.$once[data.name],fn) == -1){
             this.$once[data.name].push(fn);
         }
 
