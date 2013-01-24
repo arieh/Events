@@ -232,7 +232,7 @@
         }else{
             if (!obj.$events[type]) obj.$events[type] = [fn];
             else if (indexOf(obj.$events[type],fn)==-1){
-                obj.$evetns[type].push(fn);
+                obj.$events[type].push(fn);
             }
         }
     }
