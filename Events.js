@@ -244,7 +244,7 @@
         if (compat){
             obj.$event_element.dispatchEvent(ev);
         }else{
-            for (i=0; fn = obj.$events[type]; i++){
+            for (i=0; fn = obj.$events[type][i]; i++){
                 fn.apply(null,[ev]);
             }
         }
