@@ -244,6 +244,8 @@
         if (compat){
             obj.$event_element.dispatchEvent(ev);
         }else{
+            if (!obj.$events[type]) return;
+
             for (i=0; fn = obj.$events[type][i]; i++){
                 fn.apply(null,[ev]);
             }
