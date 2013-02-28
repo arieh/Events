@@ -1,4 +1,14 @@
-!function(){
+(function (root, factory) {
+    if (typeof exports === 'object') {
+        module.exports.Events = factory();
+    } else if (typeof define === 'function' && define.amd) {
+        define(function () {
+            return {Events : factory()};
+        });
+    } else {
+        root.Events = factory();
+    }
+}(this, function (){
     /**
      * @module Events
      */
@@ -433,6 +443,6 @@
     };     
 
     //expose Mixin to provided namespace
-    this.Events = Events;     
-}.call(this);
+    return Events;
+}));
 
