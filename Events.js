@@ -442,5 +442,5 @@
 
     //expose Mixin to provided namespace
     return Events;
-});
+}));
 
