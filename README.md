@@ -5,6 +5,7 @@ This library is intended to supply an event interface to javascript objects usin
 The library is designed with encapsulation and uninterupptability in mind. This means a broken function will not stop
 the event loop (on modern browsers).
 
+Events now also supports AMD and Require syntax.
 
 ##Features
   1. Easy to integrate - can be used as a mixin, thus making it easy to integrate with any existing codebase.
