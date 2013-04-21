@@ -13,9 +13,13 @@
      * @module Events
      */
 
-    var compat = 'createEvent' in document,
+    var use_dom = false,
         pseudo_regex = /([^:]+)(?:\:([^(]*)(?:\((.*)\))?)?/,
         addEvent, addEvents, fireEvent, removeEvent, addEventOnce, Events, fireLatchedEvent;
+
+    try {
+        use_dom = document && 'addEventListener' in document;
+    }catch(e){}
 
     //=================
     //    UTILITIES
@@ -111,7 +115,7 @@
     function createEvent(type, dis, args){
         var ev;
 
-        if (compat){
+        if (use_dom){
             ev = document.createEvent('UIEvents');
             ev.initUIEvent(type, false, false, window, 1);
         }else{
@@ -138,14 +142,16 @@
      * @param {Element} el element to use as event target. Optional
      */
     Events = function Events(el){
-        var $this = this;
+        var $this = this, alias,
+            destroy_names = "$event_element $latched $events $once addEvent addEvents fireEvent removeEvent addEventOnce fireLatchedEvent".split(' ');
 
-        if (!compat){
+        if (!use_dom){
             this.$events = {};
         }else{
             this.$event_element = el || document.createElement('events');
         }
 
+        this.$has_events = true;
         this.$latched = {};
         this.$once    = {};
 
@@ -156,13 +162,17 @@
         this.addEventOnce = addEventOnce;
         this.fireLatchedEvent = fireLatchedEvent;
 
+        for (alias in Events.aliases) {
+            this[alias] = this[Events.aliases[alias]];
+            destroy_names.push(alias);
+        }
+
         //since this code removes the reference to the events provider,
         //we want to make sure it runs after the rest of the loop is done.
         this.addEvent('destroy:delay(0)',function(){
-            var names = "$event_element $latched $events $once addEvent removeEvent addEventOnce fireLatchedEvent".split(' '),
-                i, name;
+            var i, name;
 
-            for (i=0; name = names[i]; i++) $this[name] = null;
+            for (i=0; name = destroy_names[i]; i++) $this[name] = null;
 
             this.$events_destroyed = true;
         });
@@ -174,6 +184,25 @@
     Events.processType = processType;
     Events.createEvent = createEvent;
     Events.strict = false;
+
+    /**
+     * A list of aliases for Events methods. Use this to add similar syntax to other event implementations
+     *
+     * By default, aliases include most of EventEmitter interface
+     *
+     * @property aliases
+     * @type object
+     * @public
+     * @static
+     */
+    Events.aliases = {
+        'on' : 'addEvent',
+        'addListener' : 'addEvent',
+        'once' : 'addEventOnce',
+        'removeListener' : 'removeEvent',
+        'off' : 'removeEvent',
+        'emit' : 'fireEvent'
+    };
 
     /*
      * Events.Pesudoes allows you to add pseudo behaviors
@@ -237,7 +266,7 @@
     //========================
 
     function register(obj, type, fn){
-        if (compat){
+        if (use_dom){
             obj.$event_element.addEventListener(type,fn,false);
         }else{
             if (!obj.$events[type]) obj.$events[type] = [fn];
@@ -251,7 +280,7 @@
     function dispatch(obj,type, ev){
         var i, fn;
 
-        if (compat){
+        if (use_dom){
             obj.$event_element.dispatchEvent(ev);
         }else{
             if (!obj.$events[type]) return;
@@ -265,7 +294,7 @@
     function remove(obj, type, fn){
         var index;
 
-        if (compat){
+        if (use_dom){
             obj.$event_element.removeEventListener(type,fn,false);
         }else{
             if (!obj.$events[type]) return;
@@ -440,9 +469,15 @@
         this.fireEvent(type,args);
 
         return this;
-    };     
+    };
+
+    Events.addEvent = addEvent;
+    Events.addEvents = addEvents;
+    Events.addEventOnce = addEventOnce;
+    Events.fireEvent = fireEvent;
+    Events.fireLatchedEvent = fireLatchedEvent;
+    Events.removeEvent = removeEvent;
 
     //expose Mixin to provided namespace
     return Events;
 }));
-
