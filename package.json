@@ -1,5 +1,5 @@
 {
-  "name": "arieh-events",
+  "name": "eventsjs",
   "version": "1.2.3",
   "description": "Event supplier library for browser and server",
   "main": "Events.js",

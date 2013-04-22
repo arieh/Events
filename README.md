@@ -18,7 +18,7 @@ Events now also supports AMD and CommonJS syntax.
 ## Installation
 
 ```
-npm install arieh-events
+npm install eventsjs
 ```
 
 ##Usage
