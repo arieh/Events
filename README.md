@@ -5,7 +5,7 @@ This library is intended to supply an event interface to javascript objects usin
 The library is designed with encapsulation and uninterupptability in mind. This means a broken function will not stop
 the event loop (on modern browsers).
 
-Events now also supports AMD and Require syntax.
+Events now also supports AMD and CommonJS syntax.
 
 ##Features
   1. Easy to integrate - can be used as a mixin, thus making it easy to integrate with any existing codebase.
@@ -14,6 +14,12 @@ Events now also supports AMD and Require syntax.
   4. Supports creating pseudo events (like `:once` and `:latched`).
   5. Comes with built in useful utilities.
   6. Cross-browser - falls back to a more standard costume events handler.
+
+## Installation
+
+```
+npm install arieh-events
+```
 
 ##Usage
 
