@@ -1,0 +1,23 @@
+{
+  "name": "arieh-events",
+  "version": "1.2.3",
+  "description": "Event supplier library for browser and server",
+  "main": "Events.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/arieh/Events.git"
+  },
+  "keywords": [
+    "Events"
+  ],
+  "author": "arieh@glzr.co.il",
+  "license": "MIT",
+  "readmeFilename": "README.md",
+  "gitHead": "2209fff02c05df1d5a07a0504183fb6ae92b903c"
+}
