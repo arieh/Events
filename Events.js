@@ -15,7 +15,7 @@
 
     var use_dom = false,
         pseudo_regex = /([^:]+)(?:\:([^(]*)(?:\((.*)\))?)?/,
-        addEvent, addEvents, fireEvent, removeEvent, addEventOnce, Events, fireLatchedEvent;
+        addEvent, addEvents, fireEvent, removeEvent, addEventOnce, Events, fireLatchedEvent, removeLatchedEvent;
 
     try {
         use_dom = document && 'addEventListener' in document;
@@ -161,6 +161,7 @@
         this.removeEvent = removeEvent;
         this.addEventOnce = addEventOnce;
         this.fireLatchedEvent = fireLatchedEvent;
+        this.removeLatchedEvent = removeLatchedEvent;
 
         for (alias in Events.aliases) {
             this[alias] = this[Events.aliases[alias]];
@@ -471,11 +472,16 @@
         return this;
     };
 
+    removeLatchedEvent = function removeLatchedEvent(type) {
+        this.$latched[type] = null;
+    };
+
     Events.addEvent = addEvent;
     Events.addEvents = addEvents;
     Events.addEventOnce = addEventOnce;
     Events.fireEvent = fireEvent;
     Events.fireLatchedEvent = fireLatchedEvent;
+    Events.removeLatchedEvent = removeLatchedEvent;
     Events.removeEvent = removeEvent;
 
     //expose Mixin to provided namespace
