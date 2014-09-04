@@ -2,8 +2,8 @@
     if (typeof exports === 'object') {
         module.exports.Events = factory();
     } else if (typeof define === 'function' && define.amd) {
-        define(function () {
-            return {Events : factory()};
+        define('Eventsjs/Eventsjs',[],function () {
+            return factory();
         });
     } else {
         root.Events = factory();
@@ -161,7 +161,6 @@
         this.removeEvent = removeEvent;
         this.addEventOnce = addEventOnce;
         this.fireLatchedEvent = fireLatchedEvent;
-        this.removeLatchedEvent = removeLatchedEvent;
 
         for (alias in Events.aliases) {
             this[alias] = this[Events.aliases[alias]];
@@ -345,7 +344,7 @@
         }
 
         return this;
-     };
+    };
 
     /**
      * Helper to add multiple events at once
