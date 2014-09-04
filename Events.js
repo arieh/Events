@@ -15,7 +15,7 @@
 
     var use_dom = false,
         pseudo_regex = /([^:]+)(?:\:([^(]*)(?:\((.*)\))?)?/,
-        addEvent, addEvents, fireEvent, removeEvent, addEventOnce, Events, fireLatchedEvent, removeLatchedEvent;
+        addEvent, addEvents, fireEvent, removeEvent, addEventOnce, Events, fireLatchedEvent;
 
     try {
         use_dom = document && 'addEventListener' in document;
@@ -112,12 +112,12 @@
      *
      * @return event object
      */
-    function createEvent(type, dis, args){
+    function createEvent(type, dis, args, bubbles){
         var ev;
 
         if (use_dom){
             ev = document.createEvent('UIEvents');
-            ev.initUIEvent(type, false, false, window, 1);
+            ev.initUIEvent(type, bubbles, true, window, 1);
         }else{
             ev = {};
         }
@@ -141,7 +141,7 @@
      *
      * @param {Element} el element to use as event target. Optional
      */
-    Events = function Events(el){
+    Events = function Events(el,no_destroy){
         var $this = this, alias,
             destroy_names = "$event_element $latched $events $once addEvent addEvents fireEvent removeEvent addEventOnce fireLatchedEvent".split(' ');
 
@@ -170,12 +170,14 @@
 
         //since this code removes the reference to the events provider,
         //we want to make sure it runs after the rest of the loop is done.
-        this.addEvent('destroy:delay(0)',function(){
+        if (!no_destroy) this.addEvent('destroy:delay(0)',function(){
             var i, name;
+
+            if ($this.$no_ev_destroy) return;
 
             for (i=0; name = destroy_names[i]; i++) $this[name] = null;
 
-            this.$events_destroyed = true;
+            $this.$events_destroyed = true;
         });
     };
 
@@ -375,13 +377,15 @@
      *
      * @chainable
      */
-    fireEvent = function fireEvent(type, args){
+    fireEvent = function fireEvent(type, args, bubbles){
         if (this.$events_destroyed) return this;
         var data = processType(type),
             pseudo_fn = Events.Pseudoes[data.pseudo] && Events.Pseudoes[data.pseudo].fireEvent,
             ev, fn,
             once_arr,
             temp_arr;
+
+        if (bubbles == null) bubbles = true;
 
         if (pseudo_fn){
             return pseudo_fn.call(this,data.name,args);
@@ -392,7 +396,7 @@
         once_arr = this.$once[data.name];
         this.$once[data.name] = null;
 
-        ev = createEvent(data.name, this, args);
+        ev = createEvent(data.name, this, args, bubbles);
 
         dispatch(this,data.name,ev);
 
@@ -472,16 +476,11 @@
         return this;
     };
 
-    removeLatchedEvent = function removeLatchedEvent(type) {
-        this.$latched[type] = null;
-    };
-
     Events.addEvent = addEvent;
     Events.addEvents = addEvents;
     Events.addEventOnce = addEventOnce;
     Events.fireEvent = fireEvent;
     Events.fireLatchedEvent = fireLatchedEvent;
-    Events.removeLatchedEvent = removeLatchedEvent;
     Events.removeEvent = removeEvent;
 
     //expose Mixin to provided namespace
