@@ -481,6 +481,7 @@
     Events.fireEvent = fireEvent;
     Events.fireLatchedEvent = fireLatchedEvent;
     Events.removeEvent = removeEvent;
+    Events.processType = processType;
 
     //expose Mixin to provided namespace
     return Events;
