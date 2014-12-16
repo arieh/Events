@@ -1,6 +1,6 @@
 {
   "name": "eventsjs",
-  "version": "1.3.1",
+  "version": "1.4.0",
   "description": "Event supplier library for browser and server",
   "main": "Events.js",
   "directories": {
@@ -19,5 +19,5 @@
   "author": "arieh@glzr.co.il",
   "license": "MIT",
   "readmeFilename": "README.md",
-  "gitHead": "2209fff02c05df1d5a07a0504183fb6ae92b903c"
+  "gitHead": "b837235"
 }
