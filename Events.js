@@ -1,4 +1,9 @@
 (function (root, factory) {
+    if (root.EVENTS_NO_REQUIRE) {
+        root.Events = factory();
+        return;
+    }
+
     if (typeof exports === 'object') {
         module.exports.Events = factory();
     } else if (typeof define === 'function' && define.amd) {

@@ -1,6 +1,6 @@
 {
   "name": "eventsjs",
-  "version": "1.4.0",
+  "version": "1.4.1",
   "description": "Event supplier library for browser and server",
   "main": "Events.js",
   "directories": {
