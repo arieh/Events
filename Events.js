@@ -7,8 +7,8 @@
     if (typeof exports === 'object') {
         module.exports.Events = factory();
     } else if (typeof define === 'function' && define.amd) {
-        define('Eventsjs/Eventsjs',[],function () {
-            return factory();
+        define(function () {
+            return {Events:factory()};
         });
     } else {
         root.Events = factory();
