@@ -1,4 +1,6 @@
 (function (root, factory) {
+    root = root || global;
+
     if (root.EVENTS_NO_REQUIRE) {
         root.Events = factory();
         return;
